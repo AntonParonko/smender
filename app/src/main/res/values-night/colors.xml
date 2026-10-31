@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="app_background">#FF0B1220</color>
+    <color name="text_primary">#FFE2E8F0</color>
+    <color name="text_secondary">#FF94A3B8</color>
+    <color name="surface_card">#FF111827</color>
+    <color name="surface_subtle">#FF1F2937</color>
+    <color name="border_subtle">#FF334155</color>
+    <color name="app_bar_background">#FF1E293B</color>
+    <color name="permission_chip_success_background">#FF14532D</color>
+    <color name="permission_chip_error_background">#FF7F1D1D</color>
+    <color name="permission_chip_success_text">#FF86EFAC</color>
+    <color name="permission_chip_error_text">#FFFCA5A5</color>
+    <color name="telegram_widget_configured_container">#FF0F2A1F</color>
+    <color name="telegram_widget_unconfigured_container">#FF341A1D</color>
+    <color name="screen_background">#0B1220</color>
+</resources>
