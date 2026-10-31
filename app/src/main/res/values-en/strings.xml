@@ -150,7 +150,7 @@
     <string name="permission_autostart_confirmed">Confirmed manually</string>
 
     <string name="delivery_telegram_not_configured">Telegram is not configured</string>
-    <string name="delivery_telegram_device_prefix">Device: %1$s\n%2$s</string>
+    <string name="delivery_telegram_device_prefix">Device: %1$s\n%2$s\n\n%3$s</string>
     <string name="delivery_telegram_dns_error">DNS issue for api.telegram.org</string>
     <string name="delivery_telegram_timeout">Telegram timeout</string>
     <string name="delivery_telegram_no_connection">No connection to Telegram</string>
@@ -166,4 +166,11 @@
     <string name="delivery_call_message_format">📞 Call\n%1$s</string>
     <string name="incoming_call_format">Incoming call: %1$s</string>
     <string name="default_device_name">Android Device</string>
+    <string name="battery_summary">Battery: %1$s [%2$d%%]\n%3$s</string>
+    <string name="battery_unknown">Battery: ❓ Unknown state</string>
+    <string name="battery_status_charging">Charging</string>
+    <string name="battery_status_discharging">Discharging</string>
+    <string name="battery_status_full">Full</string>
+    <string name="battery_status_not_charging">Not charging</string>
+    <string name="battery_status_unknown">❓ Unknown</string>
 </resources>

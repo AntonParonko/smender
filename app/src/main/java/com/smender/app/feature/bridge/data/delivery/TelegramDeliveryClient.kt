@@ -49,11 +49,14 @@ class TelegramDeliveryClient(
         if (botToken.isBlank() || chatId.isBlank()) {
             return DeliveryResult.Failure(context.getString(R.string.delivery_telegram_not_configured))
         }
-        val textWithDevice = if (deviceName.isBlank()) {
+        val normalizedDeviceName = deviceName.ifBlank { systemDeviceName() }
+        val batteryStatus = BatteryStatusHelper.getBatteryStatus(context)
+        val textWithDevice = context.getString(
+            R.string.delivery_telegram_device_prefix,
+            normalizedDeviceName,
+            batteryStatus,
             text
-        } else {
-            context.getString(R.string.delivery_telegram_device_prefix, deviceName, text)
-        }
+        )
 
         val url = URL("https://api.telegram.org/bot$botToken/sendMessage")
         val connection = (url.openConnection() as HttpURLConnection).apply {

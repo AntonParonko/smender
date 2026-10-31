@@ -1,6 +1,7 @@
 package com.smender.app.feature.bridge.data.delivery
 
 import android.content.Context
+import android.os.Build
 import com.smender.app.R
 import com.smender.app.feature.settings.data.BridgeSettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,12 @@ class WhatsAppDeliveryClient(
         if (accessToken.isBlank() || phoneNumberId.isBlank() || toPhone.isBlank()) {
             return@withContext DeliveryResult.Failure(context.getString(R.string.delivery_whatsapp_not_configured))
         }
+        val textWithMeta = context.getString(
+            R.string.delivery_telegram_device_prefix,
+            systemDeviceName(),
+            BatteryStatusHelper.getBatteryStatus(context),
+            text
+        )
 
         val url = URL("https://graph.facebook.com/v20.0/$phoneNumberId/messages")
         val connection = (url.openConnection() as HttpURLConnection).apply {
@@ -44,7 +51,7 @@ class WhatsAppDeliveryClient(
                 .put("messaging_product", "whatsapp")
                 .put("to", toPhone)
                 .put("type", "text")
-                .put("text", JSONObject().put("body", text))
+                .put("text", JSONObject().put("body", textWithMeta))
                 .toString()
 
             OutputStreamWriter(connection.outputStream).use { writer ->
@@ -75,5 +82,13 @@ class WhatsAppDeliveryClient(
         } finally {
             connection.disconnect()
         }
+    }
+
+    private fun systemDeviceName(): String {
+        val manufacturer = Build.MANUFACTURER.orEmpty().trim()
+        val model = Build.MODEL.orEmpty().trim()
+        if (manufacturer.isBlank()) return model.ifBlank { context.getString(R.string.default_device_name) }
+        if (model.isBlank()) return manufacturer
+        return if (model.startsWith(manufacturer, ignoreCase = true)) model else "$manufacturer $model"
     }
 }
