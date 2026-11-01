@@ -8,14 +8,14 @@ import android.content.pm.PackageManager
 import android.provider.CallLog
 import android.telephony.TelephonyManager
 import androidx.core.content.ContextCompat
+import com.smender.app.core.di.AppContainer
 import com.smender.app.R
 import com.smender.app.feature.bridge.OutboxEvents
-import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.repository.OutboxGateway
 import com.smender.app.feature.bridge.worker.DeliveryWorkScheduler
 import com.smender.app.feature.bridge.worker.InboundSyncState
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,10 +28,11 @@ class CallStateReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val settingsRepository = BridgeSettingsRepository(context)
+                val appContainer = AppContainer.from(context)
+                val settingsRepository = appContainer.bridgeSettingsRepository
                 val channels = settingsRepository.channelsForPayload(OutboxPayloadType.CALL)
                 if (channels.isEmpty()) return@launch
-                val repository = OutboxRepository(OutboxDatabaseHelper.getInstance(context))
+                val repository = appContainer.outboxRepository
 
                 when (state) {
                     TelephonyManager.EXTRA_STATE_RINGING -> {
@@ -82,8 +83,8 @@ class CallStateReceiver : BroadcastReceiver() {
 
     private fun enqueueCall(
         context: Context,
-        repository: OutboxRepository,
-        channels: List<com.smender.app.feature.bridge.domain.model.DeliveryChannel>,
+        repository: OutboxGateway,
+        channels: List<DeliveryChannel>,
         incomingNumber: String,
         receivedAt: Long
     ): Boolean {

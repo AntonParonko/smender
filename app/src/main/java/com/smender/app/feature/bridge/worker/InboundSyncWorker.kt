@@ -8,12 +8,12 @@ import android.provider.Telephony
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.smender.app.core.di.AppContainer
 import com.smender.app.R
 import com.smender.app.feature.bridge.OutboxEvents
-import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.repository.OutboxGateway
+import com.smender.core.domain.feature.settings.domain.repository.BridgeSettingsGateway
 
 class InboundSyncWorker(
     context: Context,
@@ -21,8 +21,9 @@ class InboundSyncWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val settingsRepository = BridgeSettingsRepository(applicationContext)
-        val outboxRepository = OutboxRepository(OutboxDatabaseHelper.getInstance(applicationContext))
+        val appContainer = AppContainer.from(applicationContext)
+        val settingsRepository = appContainer.bridgeSettingsRepository
+        val outboxRepository = appContainer.outboxRepository
 
         var hasNewRows = false
         hasNewRows = syncSms(settingsRepository, outboxRepository) || hasNewRows
@@ -36,8 +37,8 @@ class InboundSyncWorker(
     }
 
     private fun syncSms(
-        settingsRepository: BridgeSettingsRepository,
-        outboxRepository: OutboxRepository
+        settingsRepository: BridgeSettingsGateway,
+        outboxRepository: OutboxGateway
     ): Boolean {
         if (!hasPermission(Manifest.permission.READ_SMS)) return false
         val channels = settingsRepository.channelsForPayload(OutboxPayloadType.SMS)
@@ -104,8 +105,8 @@ class InboundSyncWorker(
     }
 
     private fun syncCalls(
-        settingsRepository: BridgeSettingsRepository,
-        outboxRepository: OutboxRepository
+        settingsRepository: BridgeSettingsGateway,
+        outboxRepository: OutboxGateway
     ): Boolean {
         if (!hasPermission(Manifest.permission.READ_CALL_LOG)) return false
         val channels = settingsRepository.channelsForPayload(OutboxPayloadType.CALL)

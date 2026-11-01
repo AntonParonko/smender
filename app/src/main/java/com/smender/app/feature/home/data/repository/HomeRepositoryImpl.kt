@@ -11,22 +11,22 @@ import android.os.Build
 import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import com.smender.app.R
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
-import com.smender.app.feature.bridge.domain.model.OutboxStatus
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.OutboxStatus
+import com.smender.core.domain.feature.bridge.domain.repository.OutboxGateway
 import com.smender.app.feature.home.data.system.AutostartSettingsNavigator
-import com.smender.app.feature.home.domain.model.DeliverySummaryUiState
-import com.smender.app.feature.home.domain.model.HomeUiState
-import com.smender.app.feature.home.domain.model.PermissionType
-import com.smender.app.feature.home.domain.model.PermissionStatus
-import com.smender.app.feature.home.domain.model.PermissionUiState
-import com.smender.app.feature.home.domain.repository.HomeRepository
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.home.domain.model.DeliverySummaryUiState
+import com.smender.core.domain.feature.home.domain.model.HomeUiState
+import com.smender.core.domain.feature.home.domain.model.PermissionType
+import com.smender.core.domain.feature.home.domain.model.PermissionStatus
+import com.smender.core.domain.feature.home.domain.model.PermissionUiState
+import com.smender.core.domain.feature.home.domain.repository.HomeRepository
+import com.smender.core.domain.feature.settings.domain.repository.BridgeSettingsGateway
 
 class HomeRepositoryImpl(
     private val context: Context,
-    private val outboxRepository: OutboxRepository,
-    private val settingsRepository: BridgeSettingsRepository
+    private val outboxRepository: OutboxGateway,
+    private val settingsRepository: BridgeSettingsGateway
 ) : HomeRepository {
     private val requiredPermissionSubtitle = context.getString(R.string.required_permission)
 

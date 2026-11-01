@@ -3,7 +3,7 @@ package com.smender.app.feature.bridge.data.delivery
 import android.content.Context
 import android.os.Build
 import com.smender.app.R
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.settings.domain.repository.BridgeSettingsGateway
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -16,10 +16,9 @@ import java.net.UnknownHostException
 import java.net.URL
 
 class WhatsAppDeliveryClient(
-    private val context: Context
+    private val context: Context,
+    private val settingsRepository: BridgeSettingsGateway
 ) {
-    private val settingsRepository = BridgeSettingsRepository(context)
-
     suspend fun send(text: String): DeliveryResult = withContext(Dispatchers.IO) {
         val settings = settingsRepository.getWhatsAppSettings()
         val accessToken = settings.accessToken

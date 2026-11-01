@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smender.app.R
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
 import com.smender.app.ui.components.AnchoredConfirmationMenu
 import com.smender.app.ui.theme.AppBarBackground
 import com.smender.app.ui.theme.Background
@@ -59,7 +59,7 @@ import com.smender.app.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelegramSettingsScreen(
-    settings: BridgeSettingsRepository.TelegramSettings,
+    settings: TelegramSettings,
     onTokenChanged: (String) -> Unit,
     onChatIdChanged: (String) -> Unit,
     onDeviceNameChanged: (String) -> Unit,
@@ -231,7 +231,7 @@ fun TelegramSettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelegramInstructionScreen(
-    settings: BridgeSettingsRepository.TelegramSettings,
+    settings: TelegramSettings,
     onBackClick: () -> Unit,
     onTokenChanged: (String) -> Unit,
     onChatIdChanged: (String) -> Unit,

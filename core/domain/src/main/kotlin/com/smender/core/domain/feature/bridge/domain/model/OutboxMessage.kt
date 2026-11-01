@@ -1,4 +1,4 @@
-package com.smender.app.feature.bridge.domain.model
+package com.smender.core.domain.feature.bridge.domain.model
 
 data class OutboxMessage(
     val id: Long,

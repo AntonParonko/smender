@@ -33,23 +33,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
+import com.smender.app.core.di.AppContainer
 import com.smender.app.feature.bridge.data.delivery.DeliveryResult
-import com.smender.app.feature.bridge.data.delivery.TelegramDeliveryClient
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.bridge.domain.model.DeliveryChannel
-import com.smender.app.feature.bridge.domain.model.OutboxMessage
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.OutboxMessage
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.OutboxStatus
 import com.smender.app.feature.bridge.OutboxEvents
 import com.smender.app.feature.bridge.worker.DeliveryWorkScheduler
-import com.smender.app.feature.home.data.repository.HomeRepositoryImpl
 import com.smender.app.feature.home.data.system.AutostartSettingsNavigator
-import com.smender.app.feature.home.domain.model.HomeUiState
-import com.smender.app.feature.home.domain.model.PermissionType
-import com.smender.app.feature.home.domain.model.PermissionUiState
+import com.smender.core.domain.feature.home.domain.model.HomeUiState
+import com.smender.core.domain.feature.home.domain.model.PermissionType
+import com.smender.core.domain.feature.home.domain.model.PermissionUiState
+import com.smender.core.domain.feature.home.domain.usecase.GetHomeUiStateUseCase
+import com.smender.core.domain.feature.outbox.domain.usecase.ClearOutboxMessagesUseCase
+import com.smender.core.domain.feature.outbox.domain.usecase.DeleteOutboxMessageUseCase
+import com.smender.core.domain.feature.outbox.domain.usecase.GetOutboxMessagesUseCase
 import com.smender.app.feature.home.presentation.HomeScreen
 import com.smender.app.feature.outbox.presentation.OutboxListScreen
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
+import com.smender.core.domain.feature.settings.domain.model.WhatsAppSettings
+import com.smender.core.domain.feature.settings.domain.repository.BridgeSettingsGateway
 import com.smender.app.feature.telegram.presentation.TelegramInstructionScreen
 import com.smender.app.feature.telegram.presentation.TelegramSettingsScreen
 import com.smender.app.feature.whatsapp.presentation.WhatsAppInstructionScreen
@@ -65,9 +68,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class MainActivity : ComponentActivity() {
-    private lateinit var outboxRepository: OutboxRepository
-    private lateinit var settingsRepository: BridgeSettingsRepository
-    private lateinit var homeRepository: HomeRepositoryImpl
+    private lateinit var appContainer: AppContainer
+    private lateinit var settingsRepository: BridgeSettingsGateway
+    private lateinit var getHomeUiState: GetHomeUiStateUseCase
+    private lateinit var getOutboxMessages: GetOutboxMessagesUseCase
+    private lateinit var deleteOutboxMessageUseCase: DeleteOutboxMessageUseCase
+    private lateinit var clearOutboxMessagesUseCase: ClearOutboxMessagesUseCase
     private lateinit var connectivityManager: ConnectivityManager
 
     private var uiState: HomeUiState? by mutableStateOf(null)
@@ -84,16 +90,16 @@ class MainActivity : ComponentActivity() {
     private var callErrorMessages: List<OutboxMessage> by mutableStateOf(emptyList())
 
     private var telegramSettings by mutableStateOf(
-        BridgeSettingsRepository.TelegramSettings("", "", "", "", "", true, true)
+        TelegramSettings("", "", "", "", "", true, true)
     )
     private var savedTelegramSettings by mutableStateOf(
-        BridgeSettingsRepository.TelegramSettings("", "", "", "", "", true, true)
+        TelegramSettings("", "", "", "", "", true, true)
     )
     private var isTelegramBotTokenMasked by mutableStateOf(false)
     private var isTelegramChatIdMasked by mutableStateOf(false)
     private var telegramInstructionReturnScreen: AppScreen by mutableStateOf(AppScreen.TELEGRAM_SETTINGS)
     private var whatsAppSettings by mutableStateOf(
-        BridgeSettingsRepository.WhatsAppSettings("", "", "", true, true)
+        WhatsAppSettings("", "", "", true, true)
     )
     private var isOutboxReceiverRegistered = false
     private var isAwaitingAutostartConfirmation = false
@@ -132,13 +138,12 @@ class MainActivity : ComponentActivity() {
             controller.isAppearanceLightNavigationBars = false
         }
 
-        settingsRepository = BridgeSettingsRepository(applicationContext)
-        outboxRepository = OutboxRepository(OutboxDatabaseHelper.getInstance(applicationContext))
-        homeRepository = HomeRepositoryImpl(
-            context = applicationContext,
-            outboxRepository = outboxRepository,
-            settingsRepository = settingsRepository
-        )
+        appContainer = AppContainer.from(applicationContext)
+        settingsRepository = appContainer.bridgeSettingsRepository
+        getHomeUiState = appContainer.getHomeUiStateUseCase
+        getOutboxMessages = appContainer.getOutboxMessagesUseCase
+        deleteOutboxMessageUseCase = appContainer.deleteOutboxMessageUseCase
+        clearOutboxMessagesUseCase = appContainer.clearOutboxMessagesUseCase
         connectivityManager = getSystemService(ConnectivityManager::class.java)
         DeliveryWorkScheduler.ensurePeriodic(applicationContext)
         DeliveryWorkScheduler.enqueueInboundImmediate(applicationContext)
@@ -415,13 +420,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun refreshHomeState() {
-        uiState = homeRepository.getHomeUiState(isInternetConnectedOverride)
-        smsSentMessages = outboxRepository.getSent(OutboxPayloadType.SMS)
-        smsQueueMessages = outboxRepository.getQueue(OutboxPayloadType.SMS)
-        smsErrorMessages = outboxRepository.getErrors(OutboxPayloadType.SMS)
-        callSentMessages = outboxRepository.getSent(OutboxPayloadType.CALL)
-        callQueueMessages = outboxRepository.getQueue(OutboxPayloadType.CALL)
-        callErrorMessages = outboxRepository.getErrors(OutboxPayloadType.CALL)
+        uiState = getHomeUiState(isInternetConnectedOverride)
+        smsSentMessages = getOutboxMessages.sent(OutboxPayloadType.SMS)
+        smsQueueMessages = getOutboxMessages.queue(OutboxPayloadType.SMS)
+        smsErrorMessages = getOutboxMessages.errors(OutboxPayloadType.SMS)
+        callSentMessages = getOutboxMessages.sent(OutboxPayloadType.CALL)
+        callQueueMessages = getOutboxMessages.queue(OutboxPayloadType.CALL)
+        callErrorMessages = getOutboxMessages.errors(OutboxPayloadType.CALL)
     }
 
     private fun handlePermissionClick(permission: PermissionUiState) {
@@ -466,32 +471,32 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openSmsSent() {
-        smsSentMessages = outboxRepository.getSent(OutboxPayloadType.SMS)
+        smsSentMessages = getOutboxMessages.sent(OutboxPayloadType.SMS)
         currentScreen = AppScreen.SMS_SENT
     }
 
     private fun openSmsQueue() {
-        smsQueueMessages = outboxRepository.getQueue(OutboxPayloadType.SMS)
+        smsQueueMessages = getOutboxMessages.queue(OutboxPayloadType.SMS)
         currentScreen = AppScreen.SMS_QUEUE
     }
 
     private fun openCallsSent() {
-        callSentMessages = outboxRepository.getSent(OutboxPayloadType.CALL)
+        callSentMessages = getOutboxMessages.sent(OutboxPayloadType.CALL)
         currentScreen = AppScreen.CALLS_SENT
     }
 
     private fun openCallsQueue() {
-        callQueueMessages = outboxRepository.getQueue(OutboxPayloadType.CALL)
+        callQueueMessages = getOutboxMessages.queue(OutboxPayloadType.CALL)
         currentScreen = AppScreen.CALLS_QUEUE
     }
 
     private fun openSmsErrors() {
-        smsErrorMessages = outboxRepository.getErrors(OutboxPayloadType.SMS)
+        smsErrorMessages = getOutboxMessages.errors(OutboxPayloadType.SMS)
         currentScreen = AppScreen.SMS_ERRORS
     }
 
     private fun openCallsErrors() {
-        callErrorMessages = outboxRepository.getErrors(OutboxPayloadType.CALL)
+        callErrorMessages = getOutboxMessages.errors(OutboxPayloadType.CALL)
         currentScreen = AppScreen.CALLS_ERRORS
     }
 
@@ -563,7 +568,7 @@ class MainActivity : ComponentActivity() {
         }
         lifecycleScope.launch {
             when (
-                val result = TelegramDeliveryClient(applicationContext).sendWithCredentials(
+                val result = appContainer.telegramDeliveryClient.sendWithCredentials(
                     botToken = botToken,
                     chatId = chatId,
                     deviceName = telegramSettings.deviceName,
@@ -605,37 +610,37 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun clearSmsErrors() {
-        outboxRepository.deleteErrors(OutboxPayloadType.SMS)
+        clearOutboxMessagesUseCase(OutboxPayloadType.SMS, OutboxStatus.ERROR)
         refreshHomeState()
     }
 
     private fun clearSmsSent() {
-        outboxRepository.deleteSent(OutboxPayloadType.SMS)
+        clearOutboxMessagesUseCase(OutboxPayloadType.SMS, OutboxStatus.SENT)
         refreshHomeState()
     }
 
     private fun clearSmsQueue() {
-        outboxRepository.deleteQueue(OutboxPayloadType.SMS)
+        clearOutboxMessagesUseCase(OutboxPayloadType.SMS, OutboxStatus.PENDING)
         refreshHomeState()
     }
 
     private fun clearCallsSent() {
-        outboxRepository.deleteSent(OutboxPayloadType.CALL)
+        clearOutboxMessagesUseCase(OutboxPayloadType.CALL, OutboxStatus.SENT)
         refreshHomeState()
     }
 
     private fun clearCallsQueue() {
-        outboxRepository.deleteQueue(OutboxPayloadType.CALL)
+        clearOutboxMessagesUseCase(OutboxPayloadType.CALL, OutboxStatus.PENDING)
         refreshHomeState()
     }
 
     private fun clearCallsErrors() {
-        outboxRepository.deleteErrors(OutboxPayloadType.CALL)
+        clearOutboxMessagesUseCase(OutboxPayloadType.CALL, OutboxStatus.ERROR)
         refreshHomeState()
     }
 
     private fun deleteOutboxMessage(id: Long) {
-        outboxRepository.deleteById(id)
+        deleteOutboxMessageUseCase(id)
         refreshHomeState()
     }
 
@@ -752,8 +757,8 @@ class MainActivity : ComponentActivity() {
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
-    private fun BridgeSettingsRepository.TelegramSettings.withDefaultDeviceName():
-        BridgeSettingsRepository.TelegramSettings {
+    private fun TelegramSettings.withDefaultDeviceName():
+        TelegramSettings {
         return if (deviceName.isBlank()) {
             copy(deviceName = systemDeviceName())
         } else {

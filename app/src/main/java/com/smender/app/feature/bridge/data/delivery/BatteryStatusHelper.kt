@@ -39,16 +39,16 @@ object BatteryStatusHelper {
 
     private fun batteryLevelIndicator(level: Int): String {
         val clamped = level.coerceIn(0, 100)
-        val filledCount = ((clamped + 9) / 10).coerceIn(0, 10)
+        val filledCount = ((clamped + 19) / 20).coerceIn(0, 5)
         val filledBlock = when {
             clamped <= 20 -> "🟥"
             clamped <= 40 -> "🟨"
             else -> "🟩"
         }
         val emptyBlock = "⬜️"
-        return buildString(20) {
+        return buildString(10) {
             repeat(filledCount) { append(filledBlock) }
-            repeat(10 - filledCount) { append(emptyBlock) }
+            repeat(5 - filledCount) { append(emptyBlock) }
         }
     }
 }

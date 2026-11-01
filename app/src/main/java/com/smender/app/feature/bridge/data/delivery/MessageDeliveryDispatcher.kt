@@ -2,9 +2,9 @@ package com.smender.app.feature.bridge.data.delivery
 
 import android.content.Context
 import com.smender.app.R
-import com.smender.app.feature.bridge.domain.model.DeliveryChannel
-import com.smender.app.feature.bridge.domain.model.OutboxMessage
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
+import com.smender.core.domain.feature.bridge.domain.model.OutboxMessage
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
 
 class MessageDeliveryDispatcher(
     private val context: Context,

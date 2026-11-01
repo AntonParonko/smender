@@ -4,13 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
+import com.smender.app.core.di.AppContainer
 import com.smender.app.feature.bridge.OutboxEvents
-import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
 import com.smender.app.feature.bridge.worker.DeliveryWorkScheduler
 import com.smender.app.feature.bridge.worker.InboundSyncState
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,8 +33,9 @@ class SmsIncomingReceiver : BroadcastReceiver() {
                 val receivedAt = smsTimestamp.takeIf { it > 0L } ?: System.currentTimeMillis()
                 val watermarkAt = maxOf(receivedAt, System.currentTimeMillis())
                 InboundSyncState.markSmsAtLeast(context, watermarkAt)
-                val repository = OutboxRepository(OutboxDatabaseHelper.getInstance(context))
-                val settingsRepository = BridgeSettingsRepository(context)
+                val appContainer = AppContainer.from(context)
+                val repository = appContainer.outboxRepository
+                val settingsRepository = appContainer.bridgeSettingsRepository
                 val channels = settingsRepository.channelsForPayload(OutboxPayloadType.SMS)
                 repository.enqueue(
                     senderAddress = senderAddress,

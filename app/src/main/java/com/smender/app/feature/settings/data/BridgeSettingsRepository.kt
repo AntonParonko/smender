@@ -1,15 +1,18 @@
 package com.smender.app.feature.settings.data
 
 import android.content.Context
-import com.smender.app.feature.bridge.domain.model.DeliveryChannel
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
+import com.smender.core.domain.feature.settings.domain.model.WhatsAppSettings
+import com.smender.core.domain.feature.settings.domain.repository.BridgeSettingsGateway
 
 class BridgeSettingsRepository(
     context: Context
-) {
+) : BridgeSettingsGateway {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getTelegramSettings(): TelegramSettings {
+    override fun getTelegramSettings(): TelegramSettings {
         return TelegramSettings(
             botToken = prefs.getString(KEY_TELEGRAM_BOT_TOKEN, "").orEmpty(),
             chatId = prefs.getString(KEY_TELEGRAM_CHAT_ID, "").orEmpty(),
@@ -21,7 +24,7 @@ class BridgeSettingsRepository(
         )
     }
 
-    fun saveTelegramSettings(settings: TelegramSettings) {
+    override fun saveTelegramSettings(settings: TelegramSettings) {
         prefs.edit()
             .putString(KEY_TELEGRAM_BOT_TOKEN, settings.botToken)
             .putString(KEY_TELEGRAM_CHAT_ID, settings.chatId)
@@ -33,7 +36,7 @@ class BridgeSettingsRepository(
             .apply()
     }
 
-    fun resetTelegramSettings() {
+    override fun resetTelegramSettings() {
         prefs.edit()
             .remove(KEY_TELEGRAM_BOT_TOKEN)
             .remove(KEY_TELEGRAM_CHAT_ID)
@@ -45,7 +48,7 @@ class BridgeSettingsRepository(
             .apply()
     }
 
-    fun getWhatsAppSettings(): WhatsAppSettings {
+    override fun getWhatsAppSettings(): WhatsAppSettings {
         return WhatsAppSettings(
             accessToken = prefs.getString(KEY_WHATSAPP_ACCESS_TOKEN, "").orEmpty(),
             phoneNumberId = prefs.getString(KEY_WHATSAPP_PHONE_NUMBER_ID, "").orEmpty(),
@@ -55,7 +58,7 @@ class BridgeSettingsRepository(
         )
     }
 
-    fun saveWhatsAppSettings(settings: WhatsAppSettings) {
+    override fun saveWhatsAppSettings(settings: WhatsAppSettings) {
         prefs.edit()
             .putString(KEY_WHATSAPP_ACCESS_TOKEN, settings.accessToken)
             .putString(KEY_WHATSAPP_PHONE_NUMBER_ID, settings.phoneNumberId)
@@ -65,7 +68,7 @@ class BridgeSettingsRepository(
             .apply()
     }
 
-    fun resetWhatsAppSettings() {
+    override fun resetWhatsAppSettings() {
         prefs.edit()
             .remove(KEY_WHATSAPP_ACCESS_TOKEN)
             .remove(KEY_WHATSAPP_PHONE_NUMBER_ID)
@@ -75,14 +78,14 @@ class BridgeSettingsRepository(
             .apply()
     }
 
-    fun isChannelConfigured(channel: DeliveryChannel): Boolean {
+    override fun isChannelConfigured(channel: DeliveryChannel): Boolean {
         return when (channel) {
             DeliveryChannel.TELEGRAM -> getTelegramSettings().isConfigured
             DeliveryChannel.WHATSAPP -> getWhatsAppSettings().isConfigured
         }
     }
 
-    fun canSend(channel: DeliveryChannel, payloadType: OutboxPayloadType): Boolean {
+    override fun canSend(channel: DeliveryChannel, payloadType: OutboxPayloadType): Boolean {
         return when (channel) {
             DeliveryChannel.TELEGRAM -> {
                 val settings = getTelegramSettings()
@@ -102,62 +105,16 @@ class BridgeSettingsRepository(
         }
     }
 
-    fun channelsForPayload(payloadType: OutboxPayloadType): List<DeliveryChannel> {
+    override fun channelsForPayload(payloadType: OutboxPayloadType): List<DeliveryChannel> {
         return DeliveryChannel.entries.filter { canSend(it, payloadType) }
     }
 
-    fun isAutostartConfirmed(): Boolean {
+    override fun isAutostartConfirmed(): Boolean {
         return prefs.getBoolean(KEY_AUTOSTART_CONFIRMED, false)
     }
 
-    fun setAutostartConfirmed(isConfirmed: Boolean) {
+    override fun setAutostartConfirmed(isConfirmed: Boolean) {
         prefs.edit().putBoolean(KEY_AUTOSTART_CONFIRMED, isConfirmed).apply()
-    }
-
-    private fun isChannelEnabledForPayload(
-        channel: DeliveryChannel,
-        payloadType: OutboxPayloadType
-    ): Boolean {
-        return when (channel) {
-            DeliveryChannel.TELEGRAM -> {
-                val settings = getTelegramSettings()
-                when (payloadType) {
-                    OutboxPayloadType.SMS -> settings.smsEnabled
-                    OutboxPayloadType.CALL -> settings.callsEnabled
-                }
-            }
-
-            DeliveryChannel.WHATSAPP -> {
-                val settings = getWhatsAppSettings()
-                when (payloadType) {
-                    OutboxPayloadType.SMS -> settings.smsEnabled
-                    OutboxPayloadType.CALL -> settings.callsEnabled
-                }
-            }
-        }
-    }
-
-    data class TelegramSettings(
-        val botToken: String,
-        val chatId: String,
-        val botName: String,
-        val botAvatarUrl: String,
-        val deviceName: String,
-        val smsEnabled: Boolean,
-        val callsEnabled: Boolean
-    ) {
-        val isConfigured: Boolean get() = botToken.isNotBlank() && chatId.isNotBlank()
-    }
-
-    data class WhatsAppSettings(
-        val accessToken: String,
-        val phoneNumberId: String,
-        val toPhone: String,
-        val smsEnabled: Boolean,
-        val callsEnabled: Boolean
-    ) {
-        val isConfigured: Boolean get() =
-            accessToken.isNotBlank() && phoneNumberId.isNotBlank() && toPhone.isNotBlank()
     }
 
     companion object {

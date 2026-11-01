@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Smender"
 include(":app")
+include(":core:domain")
  

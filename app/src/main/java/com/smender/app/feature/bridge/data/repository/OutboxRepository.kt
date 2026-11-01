@@ -2,22 +2,23 @@ package com.smender.app.feature.bridge.data.repository
 
 import android.content.ContentValues
 import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
-import com.smender.app.feature.bridge.domain.model.DeliveryChannel
-import com.smender.app.feature.bridge.domain.model.OutboxMessage
-import com.smender.app.feature.bridge.domain.model.OutboxPayloadType
-import com.smender.app.feature.bridge.domain.model.OutboxStatus
+import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
+import com.smender.core.domain.feature.bridge.domain.model.OutboxMessage
+import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
+import com.smender.core.domain.feature.bridge.domain.model.OutboxStatus
+import com.smender.core.domain.feature.bridge.domain.repository.OutboxGateway
 
 class OutboxRepository(
     private val dbHelper: OutboxDatabaseHelper
-) {
+) : OutboxGateway {
 
-    fun enqueue(
+    override fun enqueue(
         senderAddress: String,
         messageBody: String,
         receivedAtEpochMillis: Long,
         payloadType: OutboxPayloadType,
         channels: List<DeliveryChannel>,
-        sourceSim: String? = null
+        sourceSim: String?
     ) {
         if (channels.isEmpty()) return
         val db = dbHelper.writableDatabase
@@ -46,7 +47,7 @@ class OutboxRepository(
         }
     }
 
-    fun getPending(limit: Int = 50): List<OutboxMessage> {
+    override fun getPending(limit: Int): List<OutboxMessage> {
         return getByStatuses(
             statuses = listOf(OutboxStatus.PENDING),
             orderBy = "received_at_epoch_ms ASC",
@@ -54,7 +55,7 @@ class OutboxRepository(
         )
     }
 
-    fun getSent(payloadType: OutboxPayloadType, limit: Int = 200): List<OutboxMessage> {
+    override fun getSent(payloadType: OutboxPayloadType, limit: Int): List<OutboxMessage> {
         return getByStatusesAndType(
             statuses = listOf(OutboxStatus.SENT),
             payloadType = payloadType,
@@ -63,7 +64,7 @@ class OutboxRepository(
         )
     }
 
-    fun getQueue(payloadType: OutboxPayloadType, limit: Int = 200): List<OutboxMessage> {
+    override fun getQueue(payloadType: OutboxPayloadType, limit: Int): List<OutboxMessage> {
         return getByStatusesAndType(
             statuses = listOf(OutboxStatus.PENDING),
             payloadType = payloadType,
@@ -72,7 +73,7 @@ class OutboxRepository(
         )
     }
 
-    fun getErrors(payloadType: OutboxPayloadType, limit: Int = 200): List<OutboxMessage> {
+    override fun getErrors(payloadType: OutboxPayloadType, limit: Int): List<OutboxMessage> {
         return getByStatusesAndType(
             statuses = listOf(OutboxStatus.ERROR),
             payloadType = payloadType,
@@ -81,7 +82,7 @@ class OutboxRepository(
         )
     }
 
-    fun countByStatus(payloadType: OutboxPayloadType, status: OutboxStatus): Int {
+    override fun countByStatus(payloadType: OutboxPayloadType, status: OutboxStatus): Int {
         val db = dbHelper.readableDatabase
         val cursor = db.rawQuery(
             """
@@ -96,7 +97,7 @@ class OutboxRepository(
         }
     }
 
-    fun markSent(id: Long) {
+    override fun markSent(id: Long) {
         val db = dbHelper.writableDatabase
         val values = ContentValues().apply {
             put("status", OutboxStatus.SENT.name)
@@ -105,11 +106,11 @@ class OutboxRepository(
         db.update("message_outbox", values, "id = ?", arrayOf(id.toString()))
     }
 
-    fun markAttemptFailure(
+    override fun markAttemptFailure(
         id: Long,
         error: String,
         attemptsToAdd: Int,
-        maxAttempts: Int = 3
+        maxAttempts: Int
     ) {
         val db = dbHelper.writableDatabase
         db.execSQL(
@@ -132,29 +133,29 @@ class OutboxRepository(
         )
     }
 
-    fun deleteById(id: Long) {
+    override fun deleteById(id: Long) {
         val db = dbHelper.writableDatabase
         db.delete("message_outbox", "id = ?", arrayOf(id.toString()))
     }
 
-    fun deleteSent(payloadType: OutboxPayloadType) {
+    override fun deleteSent(payloadType: OutboxPayloadType) {
         deleteByTypeAndStatus(payloadType, OutboxStatus.SENT)
     }
 
-    fun deleteQueue(payloadType: OutboxPayloadType) {
+    override fun deleteQueue(payloadType: OutboxPayloadType) {
         deleteByTypeAndStatus(payloadType, OutboxStatus.PENDING)
     }
 
-    fun deleteErrors(payloadType: OutboxPayloadType) {
+    override fun deleteErrors(payloadType: OutboxPayloadType) {
         deleteByTypeAndStatus(payloadType, OutboxStatus.ERROR)
     }
 
-    fun hasRecentDuplicate(
+    override fun hasRecentDuplicate(
         payloadType: OutboxPayloadType,
         senderAddress: String,
         messageBody: String,
         sourceSim: String?,
-        withinMillis: Long = 5_000
+        withinMillis: Long
     ): Boolean {
         val threshold = System.currentTimeMillis() - withinMillis
         val normalizedSourceSim = sourceSim.orEmpty()

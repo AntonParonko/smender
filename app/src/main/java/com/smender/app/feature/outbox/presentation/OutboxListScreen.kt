@@ -39,9 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smender.app.R
-import com.smender.app.feature.bridge.domain.model.DeliveryChannel
-import com.smender.app.feature.bridge.domain.model.OutboxMessage
-import com.smender.app.feature.bridge.domain.model.OutboxStatus
+import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
+import com.smender.core.domain.feature.bridge.domain.model.OutboxMessage
+import com.smender.core.domain.feature.bridge.domain.model.OutboxStatus
 import com.smender.app.ui.theme.AppBarBackground
 import com.smender.app.ui.theme.Background
 import com.smender.app.ui.theme.Blue600
@@ -179,9 +179,10 @@ fun OutboxListScreen(
                                 fontSize = 12.sp
                             )
                             Text(message.messageBody, color = TextPrimary, fontSize = 13.sp)
-                            if (!message.lastError.isNullOrBlank()) {
+                            val lastError = message.lastError
+                            if (!lastError.isNullOrBlank()) {
                                 Text(
-                                    text = stringResource(R.string.error_with_reason, message.lastError),
+                                    text = stringResource(R.string.error_with_reason, lastError),
                                     color = colorResource(R.color.red_600),
                                     fontSize = 12.sp
                                 )

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.smender.app.R
 import com.smender.app.ui.theme.AppBarBackground
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
+import com.smender.core.domain.feature.settings.domain.model.WhatsAppSettings
 import com.smender.app.ui.theme.Background
 import com.smender.app.ui.theme.SurfaceCard
 import com.smender.app.ui.theme.TextPrimary
@@ -44,7 +44,7 @@ import com.smender.app.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhatsAppSettingsScreen(
-    settings: BridgeSettingsRepository.WhatsAppSettings,
+    settings: WhatsAppSettings,
     onBackClick: () -> Unit,
     onAccessTokenChanged: (String) -> Unit,
     onPhoneNumberIdChanged: (String) -> Unit,

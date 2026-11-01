@@ -59,11 +59,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.smender.app.feature.home.domain.model.DeliverySummaryUiState
-import com.smender.app.feature.home.domain.model.HomeUiState
-import com.smender.app.feature.home.domain.model.PermissionStatus
-import com.smender.app.feature.home.domain.model.PermissionType
-import com.smender.app.feature.home.domain.model.PermissionUiState
+import com.smender.core.domain.feature.home.domain.model.DeliverySummaryUiState
+import com.smender.core.domain.feature.home.domain.model.HomeUiState
+import com.smender.core.domain.feature.home.domain.model.PermissionStatus
+import com.smender.core.domain.feature.home.domain.model.PermissionType
+import com.smender.core.domain.feature.home.domain.model.PermissionUiState
 import coil.compose.AsyncImage
 import com.smender.app.R
 import com.smender.app.ui.theme.Background

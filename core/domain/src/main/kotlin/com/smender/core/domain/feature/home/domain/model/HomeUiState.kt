@@ -1,4 +1,4 @@
-package com.smender.app.feature.home.domain.model
+package com.smender.core.domain.feature.home.domain.model
 
 data class HomeUiState(
     val smsSummary: DeliverySummaryUiState,

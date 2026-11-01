@@ -3,14 +3,9 @@ package com.smender.app.feature.bridge.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.smender.app.core.di.AppContainer
 import com.smender.app.feature.bridge.OutboxEvents
 import com.smender.app.feature.bridge.data.delivery.DeliveryResult
-import com.smender.app.feature.bridge.data.delivery.MessageDeliveryDispatcher
-import com.smender.app.feature.bridge.data.delivery.TelegramDeliveryClient
-import com.smender.app.feature.bridge.data.delivery.WhatsAppDeliveryClient
-import com.smender.app.feature.bridge.data.local.OutboxDatabaseHelper
-import com.smender.app.feature.bridge.data.repository.OutboxRepository
-import com.smender.app.feature.settings.data.BridgeSettingsRepository
 
 class OutboxDeliveryWorker(
     context: Context,
@@ -18,13 +13,10 @@ class OutboxDeliveryWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val repository = OutboxRepository(OutboxDatabaseHelper.getInstance(applicationContext))
-        val dispatcher = MessageDeliveryDispatcher(
-            context = applicationContext,
-            telegramClient = TelegramDeliveryClient(applicationContext),
-            whatsappClient = WhatsAppDeliveryClient(applicationContext)
-        )
-        val settingsRepository = BridgeSettingsRepository(applicationContext)
+        val appContainer = AppContainer.from(applicationContext)
+        val repository = appContainer.outboxRepository
+        val dispatcher = appContainer.messageDeliveryDispatcher
+        val settingsRepository = appContainer.bridgeSettingsRepository
 
         val pending = repository.getPending(limit = 100)
         if (pending.isEmpty()) return Result.success()
