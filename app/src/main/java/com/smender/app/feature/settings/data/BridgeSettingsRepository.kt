@@ -1,6 +1,9 @@
 package com.smender.app.feature.settings.data
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.smender.core.domain.feature.bridge.domain.model.DeliveryChannel
 import com.smender.core.domain.feature.bridge.domain.model.OutboxPayloadType
 import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
@@ -10,7 +13,12 @@ import com.smender.core.domain.feature.settings.domain.repository.BridgeSettings
 class BridgeSettingsRepository(
     context: Context
 ) : BridgeSettingsGateway {
-    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val legacyPrefs = context.getSharedPreferences(LEGACY_PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = createEncryptedPrefs(context.applicationContext)
+
+    init {
+        migrateLegacyPrefsIfNeeded()
+    }
 
     override fun getTelegramSettings(): TelegramSettings {
         return TelegramSettings(
@@ -117,8 +125,41 @@ class BridgeSettingsRepository(
         prefs.edit().putBoolean(KEY_AUTOSTART_CONFIRMED, isConfirmed).apply()
     }
 
+    private fun migrateLegacyPrefsIfNeeded() {
+        if (prefs.getBoolean(KEY_MIGRATION_DONE, false)) return
+
+        val editor = prefs.edit()
+        legacyPrefs.all.forEach { (key, value) ->
+            copyPreferenceValue(editor, key, value)
+        }
+        editor.putBoolean(KEY_MIGRATION_DONE, true)
+        editor.apply()
+        legacyPrefs.edit().clear().apply()
+    }
+
+    private fun copyPreferenceValue(
+        editor: SharedPreferences.Editor,
+        key: String,
+        value: Any?
+    ) {
+        when (value) {
+            is String -> editor.putString(key, value)
+            is Int -> editor.putInt(key, value)
+            is Long -> editor.putLong(key, value)
+            is Float -> editor.putFloat(key, value)
+            is Boolean -> editor.putBoolean(key, value)
+            is Set<*> -> {
+                val stringSet = value.filterIsInstance<String>().toSet()
+                editor.putStringSet(key, stringSet)
+            }
+            null -> editor.remove(key)
+        }
+    }
+
     companion object {
-        private const val PREFS_NAME = "bridge_settings"
+        private const val LEGACY_PREFS_NAME = "bridge_settings"
+        private const val SECURE_PREFS_NAME = "bridge_settings_secure"
+        private const val KEY_MIGRATION_DONE = "__secure_prefs_migration_done"
 
         private const val KEY_TELEGRAM_BOT_TOKEN = "telegram_bot_token"
         private const val KEY_TELEGRAM_CHAT_ID = "telegram_chat_id"
@@ -134,5 +175,19 @@ class BridgeSettingsRepository(
         private const val KEY_WHATSAPP_SMS_ENABLED = "whatsapp_sms_enabled"
         private const val KEY_WHATSAPP_CALLS_ENABLED = "whatsapp_calls_enabled"
         private const val KEY_AUTOSTART_CONFIRMED = "autostart_confirmed"
+
+        private fun createEncryptedPrefs(context: Context): SharedPreferences {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            return EncryptedSharedPreferences.create(
+                context,
+                SECURE_PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
     }
 }
