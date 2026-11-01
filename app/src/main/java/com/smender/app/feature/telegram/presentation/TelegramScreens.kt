@@ -1,13 +1,13 @@
 package com.smender.app.feature.telegram.presentation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -39,22 +39,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.smender.app.R
-import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
 import com.smender.app.ui.components.AnchoredConfirmationMenu
 import com.smender.app.ui.theme.AppBarBackground
 import com.smender.app.ui.theme.Background
 import com.smender.app.ui.theme.BorderSubtle
-import com.smender.app.ui.theme.SurfaceCard
 import com.smender.app.ui.theme.TextPrimary
-import com.smender.app.ui.theme.TextSecondary
 import com.smender.app.ui.theme.White
+import com.smender.core.domain.feature.settings.domain.model.TelegramSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +74,7 @@ fun TelegramSettingsScreen(
     onResetClick: () -> Unit
 ) {
     var showExitConfirmation by remember { mutableStateOf(false) }
+    val isDarkTheme = isSystemInDarkTheme()
 
     fun requestBack() {
         if (hasUnsavedChanges) {
@@ -97,12 +93,23 @@ fun TelegramSettingsScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.telegram_settings_title), color = White) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = AppBarBackground),
+                title = {
+                    Text(
+                        stringResource(R.string.telegram_settings_title),
+                        color = if (isDarkTheme) White else TextPrimary
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = if (isDarkTheme) AppBarBackground else colorResource(R.color.emerald_200)
+                ),
                 navigationIcon = {
                     Box {
                         IconButton(onClick = { requestBack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), tint = White)
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                stringResource(R.string.back),
+                                tint = if (isDarkTheme) White else colorResource(R.color.blue_600)
+                            )
                         }
                         AnchoredConfirmationMenu(
                             expanded = showExitConfirmation,
@@ -243,16 +250,28 @@ fun TelegramInstructionScreen(
     onSendTestMessageClick: () -> Unit,
     onSaveAndFinishClick: () -> Unit
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
     Scaffold(
         containerColor = Background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.telegram_instruction_title), color = White) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = AppBarBackground),
+                title = {
+                    Text(
+                        stringResource(R.string.telegram_instruction_title),
+                        color = if (isDarkTheme) White else TextPrimary
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = if (isDarkTheme) AppBarBackground else colorResource(R.color.emerald_200)
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), tint = White)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            stringResource(R.string.back),
+                            tint = if (isDarkTheme) White else colorResource(R.color.blue_600)
+                        )
                     }
                 }
             )
@@ -291,7 +310,9 @@ fun TelegramInstructionScreen(
                 subtitle = stringResource(R.string.telegram_create_bot_subtitle),
                 badgeColor = colorResource(R.color.violet_600)
             ) {
-                TelegramCommandRow(command = "/newbot", onCopyClick = { onCopyTextClick("/newbot") })
+                TelegramCommandRow(
+                    command = "/newbot",
+                    onCopyClick = { onCopyTextClick("/newbot") })
             }
 
             TelegramInstructionStepCard(

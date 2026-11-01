@@ -97,6 +97,7 @@ fun HomeScreen(
     telegramBotName: String,
     telegramBotAvatarUrl: String
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
     val sortedPermissions = uiState.permissions.sortedBy { it.isGranted }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -111,13 +112,13 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.app_name),
-                            color = White,
+                            color = if (isDarkTheme) White else TextPrimary,
                             fontWeight = FontWeight.SemiBold
                         )
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(PermissionChipSuccessBackground)
+                                .background(if (isDarkTheme) PermissionChipSuccessBackground else White)
                                 .padding(horizontal = 4.dp)
                         ) {
                             Text(
@@ -130,7 +131,11 @@ fun HomeScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppBarBackground
+                    containerColor = if (isDarkTheme) {
+                        AppBarBackground
+                    } else {
+                        colorResource(R.color.emerald_200)
+                    }
                 ),
                 navigationIcon = {
                     Box(
