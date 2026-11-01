@@ -336,6 +336,15 @@ fun TelegramInstructionScreen(
 
             TelegramInstructionStepCard(
                 step = 4,
+                title = stringResource(R.string.telegram_subscribe_own_bot_title),
+                subtitle = stringResource(R.string.telegram_subscribe_own_bot_subtitle),
+                badgeColor = colorResource(R.color.orange_600)
+            ) {
+                TelegramCommandRow(command = "/start", onCopyClick = { onCopyTextClick("/start") })
+            }
+
+            TelegramInstructionStepCard(
+                step = 5,
                 title = stringResource(R.string.telegram_open_userinfobot_title),
                 subtitle = stringResource(R.string.telegram_open_userinfobot_subtitle),
                 badgeColor = colorResource(R.color.orange_600)
@@ -349,7 +358,7 @@ fun TelegramInstructionScreen(
             }
 
             TelegramInstructionStepCard(
-                step = 5,
+                step = 6,
                 title = stringResource(R.string.telegram_get_chat_id_title),
                 subtitle = stringResource(R.string.telegram_get_chat_id_subtitle),
                 badgeColor = colorResource(R.color.rose_600)
@@ -358,7 +367,7 @@ fun TelegramInstructionScreen(
             }
 
             TelegramInstructionStepCard(
-                step = 6,
+                step = 7,
                 title = stringResource(R.string.telegram_enter_chat_id_title),
                 subtitle = stringResource(R.string.telegram_enter_chat_id_subtitle),
                 badgeColor = colorResource(R.color.red_600)
@@ -377,7 +386,7 @@ fun TelegramInstructionScreen(
             }
 
             TelegramInstructionStepCard(
-                step = 7,
+                step = 8,
                 title = stringResource(R.string.telegram_check_connection_title),
                 subtitle = stringResource(R.string.telegram_check_connection_subtitle),
                 badgeColor = colorResource(R.color.indigo_600)
@@ -391,7 +400,7 @@ fun TelegramInstructionScreen(
             }
 
             TelegramInstructionStepCard(
-                step = 8,
+                step = 9,
                 title = stringResource(R.string.telegram_confirm_receive_title),
                 subtitle = stringResource(R.string.telegram_confirm_receive_subtitle),
                 badgeColor = colorResource(R.color.teal_500)

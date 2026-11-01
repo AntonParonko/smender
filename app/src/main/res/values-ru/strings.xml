@@ -88,11 +88,13 @@
     <string name="telegram_create_bot_subtitle">Отправьте команду /newbot и следуйте инструкциям</string>
     <string name="telegram_get_token_title">Получите токен</string>
     <string name="telegram_get_token_subtitle">Скопируйте токен от @BotFather и вставьте его ниже</string>
+    <string name="telegram_subscribe_own_bot_title">Подпишитесь на своего бота</string>
+    <string name="telegram_subscribe_own_bot_subtitle">Откройте созданного бота и отправьте ему /start, чтобы он мог отправлять вам сообщения</string>
     <string name="telegram_open_userinfobot_title">Откройте @userinfobot</string>
     <string name="telegram_open_userinfobot_subtitle">Найдите бота @userinfobot в Telegram</string>
     <string name="telegram_open_userinfobot_button">Открыть @userinfobot</string>
     <string name="telegram_get_chat_id_title">Получите Chat ID</string>
-    <string name="telegram_get_chat_id_subtitle">Отправьте /start и скопируйте ваш ID</string>
+    <string name="telegram_get_chat_id_subtitle">Скопируйте ваш Chat ID — это ID пользователя, который будет получать сообщения от бота</string>
     <string name="telegram_enter_chat_id_title">Введите Chat ID</string>
     <string name="telegram_enter_chat_id_subtitle">Вставьте полученный ID для личного чата</string>
     <string name="telegram_chat_id_example">Например: 123456789</string>

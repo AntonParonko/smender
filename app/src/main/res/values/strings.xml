@@ -88,11 +88,13 @@
     <string name="telegram_create_bot_subtitle">Send /newbot and follow the instructions</string>
     <string name="telegram_get_token_title">Get token</string>
     <string name="telegram_get_token_subtitle">Copy the token from @BotFather and paste it below</string>
+    <string name="telegram_subscribe_own_bot_title">Subscribe to your bot</string>
+    <string name="telegram_subscribe_own_bot_subtitle">Open your created bot and send /start so it can send messages to you</string>
     <string name="telegram_open_userinfobot_title">Open @userinfobot</string>
     <string name="telegram_open_userinfobot_subtitle">Find @userinfobot in Telegram</string>
     <string name="telegram_open_userinfobot_button">Open @userinfobot</string>
     <string name="telegram_get_chat_id_title">Get Chat ID</string>
-    <string name="telegram_get_chat_id_subtitle">Send /start and copy your ID</string>
+    <string name="telegram_get_chat_id_subtitle">Copy your Chat ID — this is the ID of the user who will receive bot messages</string>
     <string name="telegram_enter_chat_id_title">Enter Chat ID</string>
     <string name="telegram_enter_chat_id_subtitle">Paste the received ID for your personal chat</string>
     <string name="telegram_chat_id_example">For example: 123456789</string>
