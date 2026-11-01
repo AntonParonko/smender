@@ -5,7 +5,7 @@ Smender — Android-приложение для пересылки входящ�
 ## APK и версия
 
 - **Текущая версия:** `v1.0.0`
-- **Скачать APK:** `Здесь будет ссылка`
+- **Скачать APK:** [smender-v1.0.0-unsigned.apk](https://github.com/AntonParonko/smender/releases/download/v1.0.0/smender-v1.0.0-unsigned.apk)
 
 ## Скриншоты
 
