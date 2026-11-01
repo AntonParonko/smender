@@ -7,6 +7,15 @@ Smender — Android-приложение для пересылки входящ�
 - **Текущая версия:** `v1.0.0`
 - **Скачать APK:** `Здесь будет ссылка`
 
+## Скриншоты
+
+<p align="center">
+  <img src="SmenderScreens/Home.jpg" width="120" />
+  <img src="SmenderScreens/Set%20TG%201.jpg" width="120" />
+  <img src="SmenderScreens/Set%20TG%202.jpg" width="120" />
+  <img src="SmenderScreens/TG%20Settings.jpg" width="120" />
+</p>
+
 ## Что умеет приложение
 
 - Отслеживает входящие SMS.
