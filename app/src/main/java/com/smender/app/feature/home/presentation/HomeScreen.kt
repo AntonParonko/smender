@@ -84,6 +84,7 @@ import com.smender.app.ui.theme.White
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    appVersion: String,
     onPermissionClick: (PermissionUiState) -> Unit,
     onSmsSentClick: () -> Unit,
     onSmsQueueClick: () -> Unit,
@@ -104,11 +105,29 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        color = White,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            color = White,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(PermissionChipSuccessBackground)
+                                .padding(horizontal = 4.dp)
+                        ) {
+                            Text(
+                                text = "v$appVersion",
+                                color = PermissionChipSuccessText,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppBarBackground

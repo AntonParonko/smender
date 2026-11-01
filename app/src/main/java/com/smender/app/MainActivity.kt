@@ -103,6 +103,9 @@ class MainActivity : ComponentActivity() {
     )
     private var isOutboxReceiverRegistered = false
     private var isAwaitingAutostartConfirmation = false
+    private val appVersionName: String by lazy {
+        packageManager.getPackageInfo(packageName, 0).versionName.orEmpty().ifBlank { "?" }
+    }
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) = recalculateInternetState()
@@ -169,6 +172,7 @@ class MainActivity : ComponentActivity() {
                         uiState?.let {
                             HomeScreen(
                                 uiState = it,
+                                appVersion = appVersionName,
                                 onPermissionClick = ::handlePermissionClick,
                                 onSmsSentClick = ::openSmsSent,
                                 onSmsQueueClick = ::openSmsQueue,
